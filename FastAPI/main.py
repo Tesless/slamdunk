@@ -81,7 +81,7 @@ async def gen_frames():
 
             if results and results.pandas().xyxy[0] is not None:
                 resulting_json = json.loads(results.pandas().xyxy[0].to_json(orient="records"))
-                num_persons = len([d for d in resulting_json if d["confidence"] >= 0.75 and d["name"] == "person"]) #사람은 기준점 75%를 넘어야 문자
+                num_persons = len([d for d in resulting_json if d["confidence"] >= 0.50 and d["name"] == "person"]) #사람은 기준점 75%를 넘어야 문자
                 num_smoke = len([d for d in resulting_json if d["name"] == "smoke"]) # 연기는 기준점없이 문자 알람
                 num_fire = len([d for d in resulting_json if d["name"] == "fire"])  # 불 도 기준점 없이 문자 알람 
 
