@@ -74,7 +74,7 @@
                 <tr>
                   <td colspan="2" width="100%">
                     <img src="{{ url_for('video') }}" width="640" height="480" />
-                    <!--div id="videoCanvas" style="display: block;"></div--><br />
+                    <div id="videoCanvas" style="display: block;"></div><br />
                   </td>
                 </tr>
 
@@ -146,13 +146,15 @@
                   </td>
                 </tr>
                 <tr>
-                  <td width="33%" style="text-align: center;"><img
-                      src="{{ url_for('static',path='images/arrow-left.jpg')}}" width="100"
+                  <td width="33%" style="text-align: center;">
+                    <img src="{{ url_for('static',path='images/arrow-left.jpg')}}" width="100"
                       onTouchEnd="timedStopRobot();" onTouchStart="setSpeed('left');clearTimedStop();"
                       onClick="setSpeed('left');" alt="" align="middle">
                   </td>
-                  <td width="33%" style="text-align: center;"><img src="{{ url_for('static',path='images/stop.jpg')}}"
-                      width="100" onClick="stopRobot('forward');" alt="" align="middle"></td>
+                  <td width="33%" style="text-align: center;">
+                    <img src="{{ url_for('static',path='images/stop.jpg')}}" width="100" onClick="stopRobot('forward');"
+                      alt="" align="middle">
+                  </td>
                   <td width="33%" style="text-align: center;"><img
                       src="{{ url_for('static',path='images/arrow-right.jpg')}}" width="100"
                       onTouchEnd="timedStopRobot();" onTouchStart="setSpeed('right');clearTimedStop();"
@@ -179,6 +181,20 @@
                       onMouseUp="setMaxAngularSpeed(this.value);" onInput="maxAngularSpeedDisplay.value=this.value;">
                   </td>
                   <td><span style="font-weight: bold;"><output id="maxAngularSpeedDisplay" size="4"></output></span>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="33%" style="text-align: center;">
+                    <img src="{{ url_for('static',path='images/on.jpg')}}" width="100" onTouchEnd="timedStopRobot();"
+                      onTouchStart="startPatrol();clearTimedStop();" onClick="startPatrol();" alt="Patrol"
+                      align="middle">
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="67%" style="text-align: center;">
+                    <img src="{{ url_for('static',path='images/off.jpg')}}" width="100" onTouchEnd="timedStopRobot();"
+                      onTouchStart="startPatrol();clearTimedStop();" onClick="startPatrol();" alt="Patrol"
+                      align="middle">
                   </td>
                 </tr>
               </tbody>
