@@ -11,7 +11,10 @@
   <script type="text/javascript" src="{{ url_for('static',path='js/mjpegcanvas.min.js')}}"></script>
   <script type="text/javascript" src="{{ url_for('static',path='js/roslib.min.js')}}"></script>
   <script type="text/javascript" src="{{ url_for('static',path='js/simple_gui.js')}}"></script>
-  <script type="text/javascript" src="{{ url_for('static',path='js/patrol.js')}}"></script>
+  <!--script type="text/javascript" src="{{ url_for('static',path='js/patrol.js')}}"></script-->
+  <!--script src="https://cdn.jsdelivr.net/gh/RobotWebTools/roslibjs/src/roslib.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/alex-peschka/smachjs/smach.js"></script-->
+
 
 
   <script type="text/javascript">
@@ -185,7 +188,7 @@
                   <td><span style="font-weight: bold;"><output id="maxAngularSpeedDisplay" size="4"></output></span>
                   </td>
                 </tr>
-                <tr>
+                <!--tr>
                   <td colspan="33%" style="text-align: center;">
                     <img src="{{ url_for('static',path='images/on.jpg')}}" width="100" onTouchEnd="timedStopRobot();"
                       onTouchStart="startPatrol();clearTimedStop();" onClick="startPatrol();" alt="Patrol"
@@ -198,7 +201,9 @@
                       onTouchStart="startPatrol();clearTimedStop();" onClick="startPatrol();" alt="Patrol"
                       align="middle">
                   </td>
-                </tr>
+                </tr-->
+                <button id="start-btn">Start Patrol</button>
+                <button id="stop-btn">Stop Patrol</button>
               </tbody>
             </table>
           </td>
