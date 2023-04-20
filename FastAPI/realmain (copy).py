@@ -1,9 +1,10 @@
 from typing import Union
+from patrol_api import execute_patrol
 from fastapi import FastAPI
 import io
 import json
 from PIL import Image
-from fastapi import File,FastAPI, Response, Request
+from fastapi import File,FastAPI, Response
 import torch
 import cv2
 from fastapi import Request
@@ -14,28 +15,24 @@ from fastapi.responses import StreamingResponse
 import json
 import telegram
 import webbrowser
-from datetime import datetime
-import rospy
-import numpy as np
-from cv_bridge import CvBridge, CvBridgeError
-from sensor_msgs.msg import Image
-import threading
-app = FastAPI() # Fastapi 실행 app 으로 변수 지정 
-templates = Jinja2Templates(directory="templates") # 템플릿 디렉토리 지정
-app.mount("/static", StaticFiles(directory="static"), name="static") # 파일 저장공간 지정
-bridge = CvBridge() # ?
-cv2_img = np.zeros((480, 640, 3), np.uint8) # cv2_img 화면 크기?
 
-# 학습시킨 모델 불러오기 및 경로(yolov5, best.pt(학습데이터))
-model = torch.hub.load('/home/khj/slamdunk/yolov5/', 'custom','/home/khj/slamdunk/0328_custom/exp/weights/best.pt', 
-                       source='local', device='cpu', force_reload=True)
-
-
-
-# 혜진님 텔레그램 정보
 bot = telegram.Bot(token='6007372301:AAEZWipCHU_oaQV7a1Kh_0Ig-ZARlPHjHjs')
 chat_id =6102779631
 
+app = FastAPI()
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+#app.mount("/home/khj/slamdunk/FastAPI/static", StaticFiles(directory="static"), name="static")
+
+cap = cv2.VideoCapture(0)
+
+# Model
+# model = torch.hub.load('ultralytics/yolov5', 'yolov5s', device='cpu', force_reload=True)
+model = torch.hub.load('/home/khj/slamdunk/yolov5/', 'custom','/home/khj/slamdunk/0328_custom/exp/weights/best.pt', 
+                       source='local', device='cpu', force_reload=True)
+#model 변경하는 부분에서 많은 Error가 발생, local dataset을 이용시 많은 조건을 수정 필요 
+
+templates = Jinja2Templates(directory="templates")
 
 @app.get("/", response_class=HTMLResponse)
 def video_show(request: Request):
@@ -59,7 +56,7 @@ async def gen_frames():
         if num_persons != pre_num_persons or num_smoke != pre_num_smoke or num_fire != pre_num_fire:
             if num_persons > 0 and num_persons != pre_num_persons == 0:
                 message += f"사람이 {num_persons}명 확인 되었습니다.\nQR코드를 확인 합니다.\n"
-                #webbrowser.open("https://webqr.com/index.html")
+                webbrowser.open("https://webqr.com/index.html")
                 pre_num_persons = num_persons
             if num_smoke > 0 and num_smoke != pre_num_smoke:
                 message += f"연기가 {num_smoke}곳 에서 발견 되었습니다.\n지금 바로 확인 바랍니다\n"
@@ -69,29 +66,12 @@ async def gen_frames():
                 pre_num_fire = num_fire
 
         if message:
-            bot.send_message(chat_id, text=message)
-    def callback(msg):
-        
-        global cv2_img
-        try:
-            #msg = rospy.wait_for_message("/usb_cam/image_raw", Image)
-            #cv2_img = bridge.imgmsg_to_cv2(msg, "bgr8")
-            cv2_img1 = np.frombuffer(msg.data, dtype=np.uint8).reshape(msg.height, msg.width, -1)
-            cv2_img = cv2.cvtColor(cv2_img1, cv2.COLOR_RGB2BGR)
-            
-        except CvBridgeError as e:
-            print(e)
-    image_topic = "/usb_cam/image_raw"
+            await bot.send_message(chat_id, text=message)
 
-    threading.Thread(target=lambda: rospy.init_node('image_listener', disable_signals=True)).start()
-
-    rospy.Subscriber(image_topic, Image, callback)  
     while True:   
-        global cv2_img
-        
-        frame = cv2_img       
+        _, frame = cap.read()
         frame_num += 1
-        if frame is None:
+        if not _:
             break
         else:
             results = model(frame)
@@ -115,6 +95,34 @@ async def gen_frames():
 @app.get('/video')
 def video():
     return StreamingResponse(gen_frames(), media_type="multipart/x-mixed-replace; boundary=frame")
+    # return StreamingResponse(video_streaming(), media_type="multipart/x-mixed-replace; boundary=frame")
+    
+# if __name__ == "__main__":
+#     app.run(debug=True)
 
-if __name__ == '__main__':
-    FastAPI.run(app) 
+
+# def gen_frames():
+    # while(True):
+    #     ret, frame = cam.read()
+    #     results= model(frame)
+    #     annotation = results.render()
+    #     print(results.pandas().xyxy[0].to_json(orient="records"))
+    #     cv2.imshow("test", frame)
+    #     cv2.waitKey(1)
+        
+# def read_root():
+#     return {"Hello": "World"}
+
+
+# @app.get("/items/{item_id}")
+# def read_item(item_id: int, q: Union[str, None] = None):
+#     return {"item_id": item_id, "q": q}
+
+
+
+
+
+#if num_persons > 0 and num_persons != pre_num_persons:  # 사람 수가 이전 비디오와 다르면 메시지 전송
+#                    await bot.send_message(chat_id, text=f"사람이 {num_persons}명 확인 되었습니다. QR코드를 확인 합니다")
+#                    pre_num_persons = num_persons  # 이전 비디오에서 발견된 사람 수를 업데이트
+#                    print(results.pandas().head())

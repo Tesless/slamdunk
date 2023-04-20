@@ -1,15 +1,16 @@
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from typing import Union
 from fastapi import FastAPI
 import io
 import json
 from PIL import Image
-from fastapi import File,FastAPI, Response, Request
+from fastapi import File,FastAPI, Response
 import torch
 import cv2
 from fastapi import Request
-from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
 from fastapi.responses import StreamingResponse
 import json
 import telegram
@@ -20,6 +21,8 @@ import numpy as np
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
 import threading
+
+
 app = FastAPI() # Fastapi 실행 app 으로 변수 지정 
 templates = Jinja2Templates(directory="templates") # 템플릿 디렉토리 지정
 app.mount("/static", StaticFiles(directory="static"), name="static") # 파일 저장공간 지정
@@ -36,10 +39,9 @@ model = torch.hub.load('/home/khj/slamdunk/yolov5/', 'custom','/home/khj/slamdun
 bot = telegram.Bot(token='6007372301:AAEZWipCHU_oaQV7a1Kh_0Ig-ZARlPHjHjs')
 chat_id =6102779631
 
-
 @app.get("/", response_class=HTMLResponse)
-def video_show(request: Request):
-    return templates.TemplateResponse("simple_gui.html",{"request": request})
+def dashboard(request: Request):
+    return templates.TemplateResponse("index.html",{"request": request})
 async def gen_frames():
     pre_num_persons = 0 # 이전 비디오에서 발견된 사람 수를 저장할 변수 초기화
     pre_num_smoke = 0   # 이전 비디오에서 발견된 연기 수를 저장할 변수 초기화
@@ -59,7 +61,7 @@ async def gen_frames():
         if num_persons != pre_num_persons or num_smoke != pre_num_smoke or num_fire != pre_num_fire:
             if num_persons > 0 and num_persons != pre_num_persons == 0:
                 message += f"사람이 {num_persons}명 확인 되었습니다.\nQR코드를 확인 합니다.\n"
-                #webbrowser.open("https://webqr.com/index.html")
+                # webbrowser.open("https://webqr.com/index.html")
                 pre_num_persons = num_persons
             if num_smoke > 0 and num_smoke != pre_num_smoke:
                 message += f"연기가 {num_smoke}곳 에서 발견 되었습니다.\n지금 바로 확인 바랍니다\n"
@@ -69,7 +71,8 @@ async def gen_frames():
                 pre_num_fire = num_fire
 
         if message:
-            bot.send_message(chat_id, text=message)
+            await bot.send_message(chat_id, text=message)
+    
     def callback(msg):
         
         global cv2_img
@@ -101,7 +104,7 @@ async def gen_frames():
 
             if results and results.pandas().xyxy[0] is not None:
                 resulting_json = json.loads(results.pandas().xyxy[0].to_json(orient="records"))
-                num_persons = len([d for d in resulting_json if d["confidence"] >= 0.50 and d["name"] == "person"]) #사람은 기준점 75%를 넘어야 문자
+                num_persons = len([d for d in resulting_json if d["confidence"] >= 0.75 and d["name"] == "person"]) #사람은 기준점 75%를 넘어야 문자
                 num_smoke = len([d for d in resulting_json if d["name"] == "smoke"]) # 연기는 기준점없이 문자 알람
                 num_fire = len([d for d in resulting_json if d["name"] == "fire"])  # 불 도 기준점 없이 문자 알람 
 
@@ -110,11 +113,15 @@ async def gen_frames():
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
-        # print(results.pandas().xyxy[0].to_json(orient="records"))
+        # print(results.pandas().xyxy[0].to_json(orient="records")) 
 
+
+
+# 비디오 스트리밍 페이지?
 @app.get('/video')
 def video():
     return StreamingResponse(gen_frames(), media_type="multipart/x-mixed-replace; boundary=frame")
 
-if __name__ == '__main__':
-    FastAPI.run(app) 
+if __name__ == '__testmain__':
+    FastAPI.run(app)
+
