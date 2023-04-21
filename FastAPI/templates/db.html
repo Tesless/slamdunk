@@ -1,0 +1,110 @@
+<!-- <!DOCTYPE html>
+
+<html>
+
+<head>
+    <script>
+        setInterval(function () {
+            $.ajax({
+                url: '/update',
+                type: 'POST',
+                success: function (response) {
+                    console.log(response);
+                    $("#name").html(response["name"]);        
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            })
+        }, 1000);
+
+    </script>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Hello, World!</h1>
+    <p>{{ data_json }}</p> <!-- 데이터를 동적으로 표시 -->
+<!-- <strong id="name">{{data_json["name"]}} </strong>
+</body>
+
+</html> -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            setInterval(function () {
+                $.ajax({
+                    url: '/update',
+                    type: 'POST',
+                    success: function (response) {
+                        console.log(response);
+                        $("#name").html(response["name"]);
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                })
+            }, 1000);
+        });
+
+    </script>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Hello, World!</h1>
+    <p>{{ data_json }}</p> <!-- 데이터를 동적으로 표시 -->
+    <strong id="name">{{ data_json["name"] }}</strong>
+</body>
+
+</html>
+
+<!-- <!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        setInterval(function () {
+            $.ajax({
+                url: '/update',
+                type: 'POST',
+                success: function (response) {
+                    console.log(response);
+                    $("#name").html(response["name"]);
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            })
+        }, 1000);
+    </script>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Hello, World!</h1>
+    <p>{{ data_json }}</p> <!-- 데이터를 동적으로 표시 -->
+<!-- <strong id="name">{{ data_json["name"] }}</strong>
+</body>
+
+</html> -->
